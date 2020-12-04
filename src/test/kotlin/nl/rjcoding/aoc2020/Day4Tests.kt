@@ -1,6 +1,6 @@
 package nl.rjcoding.aoc2020
 
-import nl.rjcoding.aoc2020.Day4.validateKey
+import nl.rjcoding.aoc2020.Day4.isValidKey
 import org.junit.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
@@ -58,10 +58,10 @@ class Day4Tests {
     @Test
     fun containsRequiredFields() {
         val maps = Day4.parse(input).toList()
-        assertTrue(Day4.containsRequiredFields(maps[0], Day4.requiredKeys))
-        assertFalse(Day4.containsRequiredFields(maps[1], Day4.requiredKeys))
-        assertTrue(Day4.containsRequiredFields(maps[2], Day4.requiredKeys))
-        assertFalse(Day4.containsRequiredFields(maps[3], Day4.requiredKeys))
+        assertTrue(Day4.hasKeys(maps[0], Day4.requiredKeys))
+        assertFalse(Day4.hasKeys(maps[1], Day4.requiredKeys))
+        assertTrue(Day4.hasKeys(maps[2], Day4.requiredKeys))
+        assertFalse(Day4.hasKeys(maps[3], Day4.requiredKeys))
     }
 
     @Test
@@ -69,7 +69,7 @@ class Day4Tests {
         val maps = Day4.parse(valids).toList()
         assertTrue {
             maps.all { map ->
-                Day4.containsRequiredFields(map, Day4.requiredKeys) && Day4.validate(map, Day4.requiredKeys)
+                Day4.hasKeys(map, Day4.requiredKeys) && Day4.isValid(map, Day4.requiredKeys)
             }
         }
     }
@@ -79,28 +79,28 @@ class Day4Tests {
         val maps = Day4.parse(invalids).toList()
         assertFalse {
             maps.any { map ->
-                Day4.containsRequiredFields(map, Day4.requiredKeys) && Day4.validate(map, Day4.requiredKeys)
+                Day4.hasKeys(map, Day4.requiredKeys) && Day4.isValid(map, Day4.requiredKeys)
             }
         }
     }
 
     @Test
-    fun valideKeyTest() {
-        assertTrue(validateKey("byr", "2002"))
-        assertFalse(validateKey("byr", "2003"))
-        assertTrue(validateKey("hgt", "60in"))
-        assertTrue(validateKey("hgt", "190cm"))
-        assertFalse(validateKey("hgt", "190in"))
-        assertFalse(validateKey("hgt", "190"))
+    fun validKeyTest() {
+        assertTrue(isValidKey("byr", "2002"))
+        assertFalse(isValidKey("byr", "2003"))
+        assertTrue(isValidKey("hgt", "60in"))
+        assertTrue(isValidKey("hgt", "190cm"))
+        assertFalse(isValidKey("hgt", "190in"))
+        assertFalse(isValidKey("hgt", "190"))
 
-        assertTrue(validateKey("hcl", "#123abc"))
-        assertFalse(validateKey("hcl", "#123abz"))
-        assertFalse(validateKey("hcl", "123abc"))
+        assertTrue(isValidKey("hcl", "#123abc"))
+        assertFalse(isValidKey("hcl", "#123abz"))
+        assertFalse(isValidKey("hcl", "123abc"))
 
-        assertTrue(validateKey("ecl", "brn"))
-        assertFalse(validateKey("ecl", "wat"))
+        assertTrue(isValidKey("ecl", "brn"))
+        assertFalse(isValidKey("ecl", "wat"))
 
-        assertTrue(validateKey("pid", "000000001"))
-        assertFalse(validateKey("pid", "0123456789"))
+        assertTrue(isValidKey("pid", "000000001"))
+        assertFalse(isValidKey("pid", "0123456789"))
     }
 }

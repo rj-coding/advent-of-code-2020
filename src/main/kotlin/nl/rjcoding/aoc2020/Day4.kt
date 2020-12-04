@@ -15,7 +15,7 @@ object Day4 : Day {
     override fun part1(): Long {
         return Util.readInputToLines("day4.txt")
             .let(::parse)
-            .count { map -> containsRequiredFields(map, requiredKeys) }
+            .count { map -> hasKeys(map, requiredKeys) }
             .toLong()
     }
 
@@ -23,12 +23,10 @@ object Day4 : Day {
         return Util.readInputToLines("day4.txt")
             .let(::parse)
             .count { map ->
-                containsRequiredFields(map, requiredKeys) && validate(map, requiredKeys)
+                hasKeys(map, requiredKeys) && isValid(map, requiredKeys)
             }
             .toLong()
     }
-
-    fun containsRequiredFields(map: Map<String, String>, requiredKeys: Set<String>): Boolean = requiredKeys.all { map.containsKey(it) }
 
     fun parse(input: Sequence<String>): Sequence<Map<String, String>> = sequence {
         var map = mutableMapOf<String, String>()
@@ -44,11 +42,13 @@ object Day4 : Day {
             }
         }
         yield(map)
-    }
+    }.filter { it.isNotEmpty() }
 
-    fun validate(map: Map<String, String>, keys: Set<String>): Boolean = keys.all { key ->  validateKey(key, map[key]!!) }
+    fun hasKeys(map: Map<String, String>, requiredKeys: Set<String>): Boolean = requiredKeys.all { map.containsKey(it) }
 
-    fun validateKey(key: String, value: String): Boolean = when (key) {
+    fun isValid(map: Map<String, String>, keys: Set<String>): Boolean = keys.all { key ->  isValidKey(key, map[key]!!) }
+
+    fun isValidKey(key: String, value: String): Boolean = when (key) {
         "byr" -> value.toInt().let { it in 1920..2002 }
         "iyr" -> value.toInt().let { it in 2010..2020 }
         "eyr" -> value.toInt().let { it in 2020..2030 }
