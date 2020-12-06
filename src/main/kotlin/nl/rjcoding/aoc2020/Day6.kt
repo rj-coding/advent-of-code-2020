@@ -12,16 +12,16 @@ object Day6 : Day {
         .map(::intersect)
         .sum()
 
-    fun groups(input: String): List<String> = input.split("\n\n")
+    fun groups(input: String): List<List<String>> = input
+        .split("\n\n")
+        .map { it.split("\n") }
 
-    fun union(group: String): Long = group
-        .split("\n")
+    fun union(groups: List<String>): Long = groups
         .fold(setOf<Char>()) { set, line ->
             set.union(line.toCharArray().toSet())
         }.size.toLong()
 
-    fun intersect(group: String): Long = group
-        .split("\n")
+    fun intersect(groups: List<String>): Long = groups
         .fold(('a'..'z').toSet()) { set, line ->
             set.intersect(line.toCharArray().toSet())
         }.size.toLong()
