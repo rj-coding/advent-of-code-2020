@@ -8,8 +8,11 @@ object Day7 : Day {
             findBagsContaining("shiny gold", table)
         }.size.toLong()
 
-    override fun part2(): Long {
-        TODO("Not yet implemented")
+    override fun part2(): Long = Util.readInputToLines("day7.txt")
+    .map(::parse)
+    .let(::lookupTable)
+    .let { table ->
+        contentCount("shiny gold", table)
     }
 
     fun parse(line: String): Rule = line.split("contain").let { (bag, contents) ->
@@ -25,6 +28,11 @@ object Day7 : Day {
     fun findBagsContaining(color: String, lookup: Map<String, Rule>): List<Rule> {
         return lookup.values.filter { rule -> containsColor(rule, color, lookup) }
     }
+
+    fun contentCount(color: String, lookup: Map<String, Rule>): Long = lookup[color]!!.contents
+        .map { (count, color) ->
+            count * (1 + contentCount(color, lookup))
+        }.sum()
 
     fun containsColor(rule: Rule, color: String, lookup: Map<String, Rule>): Boolean {
         return rule.contents.any { it.second == color || containsColor(lookup[it.second]!!, color, lookup) }
