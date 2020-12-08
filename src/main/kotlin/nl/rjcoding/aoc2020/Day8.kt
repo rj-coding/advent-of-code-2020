@@ -1,95 +1,50 @@
 package nl.rjcoding.aoc2020
 
-sealed class Instruction
-
-data class Acc(val amount: Int): Instruction()
-data class Jmp(val offset: Int): Instruction()
-data class Nop(val data: Int) : Instruction()
-
 object Day8 : Day {
-    override fun part1(): Long = Util.readInputToLines("day8.txt")
-        .map(::parseLine).toList()
-        .let { code -> execute(code) }
-        .let { states -> takeUntilLoop(states) }
-        .last().acc
+    val program get() = Util.readInputToLines("day8.txt").let(::parse)
 
-    override fun part2(): Long = Util.readInputToLines("day8.txt")
-        .map(::parseLine).toList()
-        .let { code -> execute(fix(code)!!) }
-        .last().acc
+    override fun part1(): Long = program.let(::run).takeWhile { (_, loop) -> !loop }.last().first.toLong()
 
-    fun parseLine(line: String): Instruction = line
-        .split(" ")
-        .let { (op, data) -> when (op) {
-            "acc" -> Acc(data.toInt())
-            "jmp" -> Jmp(data.toInt())
-            else -> Nop(data.toInt())
+    override fun part2(): Long = program.let(::fixes).map { program ->
+            run(program)
+                .takeWhileInclusive { (_, loop) -> !loop }
+                .last()
+        }.first { (_, loop) -> !loop }.first.toLong()
+
+    fun parse(input: Sequence<String>) = input.map { line ->
+        line.split(" ").let { (op, data) -> op to data.toInt() }
+    }.toList()
+
+    fun fixes(program: List<Pair<String, Int>>): Sequence<List<Pair<String, Int>>> = program
+        .mapIndexedNotNull { line, (op, _) -> when (op){
+            "jmp" -> line to "nop"
+            "nop" -> line to "jmp"
+            else -> null
+        } }
+        .asSequence()
+        .map { (line, op) ->
+            program.subList(0, line) + (op to program[line].second) + program.subList(line + 1, program.size)
+        }
+
+    fun run(program: List<Pair<String, Int>>): Sequence<Pair<Int, Boolean>> = sequence {
+        var instructionPointer = 0
+        var acc = 0
+        val visited = mutableSetOf<Int>()
+
+        while (instructionPointer < program.size) {
+            if (visited.contains(instructionPointer)) {
+                yield(acc to true)
+                break;
             }
-        }
-
-    fun takeUntilLoop(states: Sequence<State>): List<State>  {
-       val parsedLines = mutableSetOf<Int>()
-       val lines = mutableListOf<State>()
-       for (state in states) {
-           if (parsedLines.contains(state.currentLine)) break
-           parsedLines.add(state.currentLine)
-           lines.add(state)
-       }
-        return lines
-    }
-
-    fun isCorrupt(code: List<Instruction>): Boolean {
-        val states = execute(code)
-        val parsedLines = mutableSetOf<Int>()
-        for (state in states) {
-            if (parsedLines.contains(state.currentLine)) return true
-            parsedLines.add(state.currentLine)
-        }
-        return false
-    }
-
-    fun execute(code: List<Instruction>): Sequence<State> = sequence {
-        var currentLine = 0
-        var accumulator = 0L
-        while (currentLine < code.size) {
-            val instruction = code[currentLine]!!
-            when (instruction) {
-                is Acc -> {
-                    accumulator += instruction.amount
-                    yield(State(currentLine++, currentLine, accumulator))
+            visited.add(instructionPointer)
+            program[instructionPointer].also { (op, data) ->
+                when (op) {
+                    "acc" -> { instructionPointer++; acc += data }
+                    "jmp" -> { instructionPointer += data }
+                    else -> instructionPointer++
                 }
-
-                is Jmp -> {
-                    currentLine += instruction.offset
-                    yield(State(currentLine - instruction.offset, currentLine, accumulator))
-                }
-
-                is Nop -> yield(State(currentLine++, currentLine, accumulator))
             }
-
+            yield(acc to false)
         }
     }
-
-    fun fix(code: List<Instruction>): List<Instruction>? {
-        if (!isCorrupt(code)) return code
-
-        val opsToFlip = code
-            .mapIndexed { line, instruction -> line to instruction }
-            .filter { (_, instruction) -> instruction is Jmp || instruction is Nop }
-
-        opsToFlip.forEach { (line, instuction)  ->
-            val newCode = code.subList(0, line) + flip(instuction) + code.subList(line + 1, code.size)
-            if (!isCorrupt(newCode)) return newCode
-        }
-
-        return null
-    }
-
-    private fun flip(instruction: Instruction) = when (instruction) {
-        is Acc -> instruction
-        is Jmp -> Nop(instruction.offset)
-        is Nop -> Jmp(instruction.data)
-    }
-
-    data class State(val currentLine: Int, val nextLine: Int, val acc: Long)
 }
