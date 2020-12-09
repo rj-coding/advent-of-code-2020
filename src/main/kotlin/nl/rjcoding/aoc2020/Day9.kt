@@ -16,21 +16,17 @@ object Day9 : Day {
     }
 
     fun isSum(value: Long, numbers: List<Long>): Boolean {
-        tailrec fun inner(a: Long, remaining: List<Long>): Boolean {
-            return when {
-                remaining.any { b -> a + b == value && a != b } -> {
-                    true
-                }
-                remaining.size >= 2 -> {
-                    inner(remaining.first(), remaining.drop(1))
-                }
-                else -> {
-                    false
-                }
+        tailrec fun inner(a: Long, remaining: List<Long>): Boolean = when {
+            remaining.any { b -> a + b == value && a != b } -> {
+                true
+            }
+            remaining.size >= 2 -> {
+                inner(remaining.first(), remaining.drop(1))
+            }
+            else -> {
+                false
             }
         }
-
-        if (numbers.size < 2) return false
         return inner(numbers.first(), numbers.drop(1))
     }
 }
