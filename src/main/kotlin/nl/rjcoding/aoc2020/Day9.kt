@@ -8,10 +8,10 @@ object Day9 : Day {
         !isSum(it.last(), it.subList(0, 26))
     }.last()
 
-    override fun part2(): Long = input().toList().let { data ->
+    override fun part2(): Long = (part1() to input().toList()).let { (answer, data) ->
         (2 .. data.size).asSequence()
             .flatMap { data.windowed(it) }
-            .first { it.sum() == 85848519L }
+            .first { it.sum() == answer }
             .minMax().let { (min, max) -> min + max }
     }
 
