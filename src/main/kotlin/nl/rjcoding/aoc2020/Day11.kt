@@ -8,30 +8,30 @@ object Day11 : Day {
 
     override fun part2(): Long = answer(updates(input, 2))
 
-    fun parse(input: Sequence<String>): Map = Map(input.map { it.toCharArray() }.toList().toTypedArray())
+    fun parse(input: Sequence<String>): Seating = Seating(input.map { it.toCharArray() }.toList().toTypedArray())
 
-    fun answer(maps: Sequence<Map>) = maps
+    fun answer(seatings: Sequence<Seating>) = seatings
         .map { it to it.seatsOccupied() }
         .windowed(2)
         .takeWhile { (prev, next) -> prev.second != next.second }
         .last().last().first.seatsOccupied().toLong()
 
-    fun updates(map: Map, part: Int) = when (part) {
-        1 -> generateSequence(map) { it.update( { r, c -> it.adjecentsByOffsets(r, c) }, 4 ) }
-        2 -> generateSequence(map) { it.update( { r, c -> it.adjecentsByRays(r, c) }, 5 ) }
+    fun updates(seating: Seating, part: Int) = when (part) {
+        1 -> generateSequence(seating) { it.update( { r, c -> it.adjecentsByOffsets(r, c) }, 4 ) }
+        2 -> generateSequence(seating) { it.update( { r, c -> it.adjecentsByRays(r, c) }, 5 ) }
         else -> emptySequence()
     }
 
-    class Map(private val seating: Array<CharArray>) {
-        val rows = seating.size
-        val cols = seating.first().size
+    class Seating(private val data: Array<CharArray>) {
+        val rows = data.size
+        val cols = data.first().size
 
-        fun copy(): Map = Map(seating.map { it.clone() }.toTypedArray())
+        fun copy(): Seating = Seating(data.map { it.clone() }.toTypedArray())
 
-        operator fun get(r: Int, c: Int): Char = seating[r][c]
-        operator fun set(r: Int, c: Int, v: Char) { seating[r][c] = v }
+        operator fun get(r: Int, c: Int): Char = data[r][c]
+        operator fun set(r: Int, c: Int, v: Char) { data[r][c] = v }
 
-        fun withinBounds(r: Int, c: Int): Boolean = when {
+        fun contains(r: Int, c: Int): Boolean = when {
             r < 0 || r >= rows -> false
             c < 0 || c >= cols -> false
             else -> true
@@ -44,15 +44,15 @@ object Day11 : Day {
 
         fun adjecentsByRays(r: Int, c: Int) = rays().map { ray ->
             ray.map { (i, j) -> (r + i) to (c + j) }
-                .first { (i, j) -> !withinBounds(i, j) || this[i, j] != '.' }
+                .first { (i, j) -> !contains(i, j) || this[i, j] != '.' }
         }
 
         fun isOccupied(r: Int, c: Int) = when {
-            !withinBounds(r, c) -> false
-            else -> seating[r][c] == '#'
+            !contains(r, c) -> false
+            else -> data[r][c] == '#'
         }
 
-        fun update(adjecents: (Int, Int) -> List<Pair<Int, Int>>, limit: Int): Map = copy().also { copy ->
+        fun update(adjecents: (Int, Int) -> List<Pair<Int, Int>>, limit: Int): Seating = copy().also { copy ->
             seats().forEach { (r, c) ->
                 when {
                     this[r, c] == 'L' && adjecents(r, c).all { (i, j) -> !isOccupied(i, j) } -> copy[r, c] = '#'
