@@ -23,14 +23,14 @@ class Day11Tests {
 
     @Test
     fun updatePart1() {
-        val maps = Day11.updates(input, 1)
+        val maps = Day11.updates(input, 1, 4)
         val result = answer(maps)
         assertEquals(37, result)
     }
 
     @Test
     fun updatePart2() {
-        val maps = Day11.updates(input, 2)
+        val maps = Day11.updates(input, 2, 5)
         val result = answer(maps)
         assertEquals(26, result)
     }

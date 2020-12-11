@@ -1,12 +1,15 @@
 package nl.rjcoding.aoc2020
 
+import nl.rjcoding.aoc2020.Util.offsets
+import nl.rjcoding.aoc2020.Util.rays
+
 object Day11 : Day {
 
     val input= Util.readInputToLines("day11.txt").let(::parse)
 
-    override fun part1(): Long = answer(updates(input, 1))
+    override fun part1(): Long = answer(updates(input, 1, 4))
 
-    override fun part2(): Long = answer(updates(input, 2))
+    override fun part2(): Long = answer(updates(input, 2, 5))
 
     fun parse(input: Sequence<String>): Seating = input.toList().let { Seating(it.size, it.first().length, it.joinToString("").toCharArray()) }
 
@@ -16,11 +19,7 @@ object Day11 : Day {
         .takeWhile { (prev, next) -> prev.second != next.second }
         .last().last().second.toLong()
 
-    fun updates(seating: Seating, part: Int) = when (part) {
-        1 -> generateSequence(seating) { it.update( { r, c -> it.adjecentsByOffsets(r, c) }, 4 ) }
-        2 -> generateSequence(seating) { it.update( { r, c -> it.adjecentsByRays(r, c) }, 5 ) }
-        else -> emptySequence()
-    }
+    fun updates(seating: Seating, part: Int, limit: Int) = generateSequence(seating) { it.update(part, limit ) }
 
     class Seating(val rows: Int, val cols: Int, private val data: CharArray) {
 
@@ -39,11 +38,12 @@ object Day11 : Day {
 
         fun seatsOccupied(): Int = seats.count { (r, c) -> isOccupied(r, c) }
 
-        fun adjecentsByOffsets(r: Int, c: Int): List<Pair<Int, Int>> = offsets.map { (i, j) -> (r + i) to (c + j) }
+        fun occupiedByOffsets(r: Int, c: Int): List<Boolean> = offsets.map { (i, j) -> isOccupied(r + i, c + j) }
 
-        fun adjecentsByRays(r: Int, c: Int) = rays.map { ray ->
+        fun occupiedByRays(r: Int, c: Int) = rays.map { ray ->
             ray.map { (i, j) -> (r + i) to (c + j) }
                 .first { (i, j) -> !contains(i, j) || this[i, j] != '.' }
+                .let { (i, j) -> isOccupied(i, j) }
         }
 
         fun isOccupied(r: Int, c: Int) = when {
@@ -51,11 +51,16 @@ object Day11 : Day {
             else -> this[r, c] == '#'
         }
 
-        fun update(adjecents: (Int, Int) -> List<Pair<Int, Int>>, limit: Int): Seating = copy().also { copy ->
+        fun update(mode: Int, limit: Int): Seating = copy().also { copy ->
             seats.forEach { (r, c) ->
+                val neighbours = when (mode) {
+                    1 -> occupiedByOffsets(r, c)
+                    2 -> occupiedByRays(r, c)
+                    else -> emptyList()
+                }
                 when {
-                    this[r, c] == 'L' && adjecents(r, c).all { (i, j) -> !isOccupied(i, j) } -> copy[r, c] = '#'
-                    this[r, c] == '#' && adjecents(r, c).filter { (i, j) -> isOccupied(i, j) }.size >= limit -> copy[r, c] = 'L'
+                    this[r, c] == 'L' && neighbours.all { !it } -> copy[r, c] = '#'
+                    this[r, c] == '#' && neighbours.filter { it }.size >= limit -> copy[r, c] = 'L'
                 }
             }
         }
