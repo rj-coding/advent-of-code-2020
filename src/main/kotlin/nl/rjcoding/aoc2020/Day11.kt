@@ -18,21 +18,27 @@ object Day11 : Day {
     fun parse(input: Sequence<String>): Seating = input.toList().let { Seating(it.size, it.first().length, it.joinToString("").chars().toArray()) }
 
     fun answer(seatings: Sequence<Seating>) = seatings
-        .map { it to it.seatsOccupied() }
+        .map { it to it.seatsOccupied }
         .windowed(2)
         .takeWhile { (prev, next) -> prev.second != next.second }
         .last().last().second.toLong()
 
     fun updates(seating: Seating, part: Int, limit: Int) = generateSequence(seating) { it.update(part, limit ) }
 
-    class Seating(val rows: Int, val cols: Int, private val data: IntArray) {
+    class Seating(val rows: Int, val cols: Int, private val data: IntArray, seatList: List<Pair<Int, Int>>? = null, occupied: Int? = null) {
 
-        val seats: List<Pair<Int, Int>> = (0 until rows).flatMap { r -> (0 until cols).map { c -> r to c } }.filter { (r, c) -> this[r, c] != FLOOR }
+        val seats: List<Pair<Int, Int>> = seatList ?: (0 until rows).flatMap { r -> (0 until cols).map { c -> r to c } }.filter { (r, c) -> this[r, c] != FLOOR }
+        var seatsOccupied: Int = occupied ?: seats.count { (r, c) -> isOccupied(r, c) }
+            private set
 
-        fun copy(): Seating = Seating(rows, cols, data.clone())
+        fun copy(): Seating = Seating(rows, cols, data.clone(), seats, seatsOccupied)
 
         operator fun get(r: Int, c: Int): Int = data[r * cols + c]
-        operator fun set(r: Int, c: Int, v: Int) { data[r * cols + c] = v }
+        operator fun set(r: Int, c: Int, v: Int) {
+            if (get(r, c) == FREE && v == OCCUPIED) seatsOccupied++
+            else if (get(r, c) == OCCUPIED && v == FREE) seatsOccupied --
+            data[r * cols + c] = v
+        }
 
         fun contains(r: Int, c: Int): Boolean = when {
             r < 0 || r >= rows -> false
@@ -40,7 +46,6 @@ object Day11 : Day {
             else -> true
         }
 
-        fun seatsOccupied(): Int = seats.count { (r, c) -> isOccupied(r, c) }
 
         fun occupiedByOffsets(r: Int, c: Int): List<Boolean> = offsets.map { (i, j) -> isOccupied(r + i, c + j) }
 
