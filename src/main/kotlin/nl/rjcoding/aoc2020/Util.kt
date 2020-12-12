@@ -37,6 +37,8 @@ fun Collection<Long>.minMax(): Pair<Long, Long> = this.fold(Long.MAX_VALUE to Lo
     kotlin.math.min(min, v) to kotlin.math.max(max, v)
 }
 
+fun <T> T.letRepeated(n: Int, block: (T) -> T): T = (0 until n).fold(this) { acc, _ -> block(acc) }
+
 data class Complex(val i: Long = 0, val j: Long = 0) {
 
     constructor(i: Int, j: Int): this(i.toLong(), j.toLong())
