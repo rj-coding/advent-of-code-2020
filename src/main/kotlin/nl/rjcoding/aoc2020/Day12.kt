@@ -28,10 +28,10 @@ object Day12 : Day {
         val distance = abs(pos.i) + abs(pos.j)
 
         fun navigate(command: String, data: Int): State = when (command) {
-            "N" -> updater(this, Complex(0, data))
-            "E" -> updater(this, Complex(data, 0))
-            "S" -> updater(this, Complex(0, -data))
-            "W" -> updater(this, Complex(-data, 0))
+            "N" -> updater(this, 0 + data * j)
+            "E" -> updater(this, data + 0 * j)
+            "S" -> updater(this, 0 - data * j)
+            "W" -> updater(this, 0 * j - data)
             "L" -> copy(waypoint = waypoint.letRepeated(data / 90) { it * j})
             "R" -> copy(waypoint = waypoint.letRepeated(data / 90) { it * -j})
             "F" -> copy(pos = pos + waypoint * data)

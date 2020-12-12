@@ -17,8 +17,8 @@ fun <T> T.letRepeated(n: Int, block: (T) -> T): T = (0 until n).fold(this) { acc
 
 operator fun Long.plus(complex: Complex) = Complex(this + complex.i, complex.j)
 operator fun Int.plus(complex: Complex) = Complex(this + complex.i, complex.j)
-operator fun Long.minus(complex: Complex) = Complex(this - complex.i, complex.j)
-operator fun Int.minus(complex: Complex) = Complex(this + -complex.i, complex.j)
+operator fun Long.minus(complex: Complex) = Complex(this - complex.i, -complex.j)
+operator fun Int.minus(complex: Complex) = Complex(this - complex.i, -complex.j)
 
 operator fun Long.times(complex: Complex) = complex * this
 operator fun Int.times(complex: Complex) = complex * this

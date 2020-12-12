@@ -4,9 +4,13 @@ data class Complex(val i: Long = 0, val j: Long = 0) {
 
     constructor(i: Int, j: Int): this(i.toLong(), j.toLong())
 
+    operator fun plus(other: Long) = plus(Complex(other, 0))
+    operator fun plus(other: Int) = plus(Complex(other, 0))
     operator fun plus(other: Complex) = Complex(i + other.i, j + other.j)
     operator fun plus(pair: Pair<Long, Long>) = Complex(i + pair.first, j + pair.second)
 
+    operator fun minus(other: Long) = minus(Complex(other, 0))
+    operator fun minus(other: Int) = minus(Complex(other, 0))
     operator fun minus(other: Complex) = Complex(i - other.i, j - other.j)
     operator fun minus(pair: Pair<Long, Long>) = Complex(i - pair.first, j - pair.second)
 
