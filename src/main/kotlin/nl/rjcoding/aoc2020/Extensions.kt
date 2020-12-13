@@ -13,7 +13,7 @@ fun Collection<Long>.minMax(): Pair<Long, Long> = this.fold(Long.MAX_VALUE to Lo
     kotlin.math.min(min, v) to kotlin.math.max(max, v)
 }
 
-fun <T> T.letRepeated(n: Int, block: (T) -> T): T = (0 until n).fold(this) { acc, _ -> block(acc) }
+fun <T> T.reduceRepeated(n: Int, block: (T) -> T): T = (0 until n).fold(this) { acc, _ -> block(acc) }
 
 operator fun Long.plus(complex: Complex) = Complex(this + complex.i, complex.j)
 operator fun Int.plus(complex: Complex) = Complex(this + complex.i, complex.j)

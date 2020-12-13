@@ -32,8 +32,8 @@ object Day12 : Day {
             "E" -> updater(this, data + 0 * j)
             "S" -> updater(this, 0 - data * j)
             "W" -> updater(this, 0 * j - data)
-            "L" -> copy(waypoint = waypoint.letRepeated(data / 90) { it * j})
-            "R" -> copy(waypoint = waypoint.letRepeated(data / 90) { it * -j})
+            "L" -> copy(waypoint = waypoint.reduceRepeated(data / 90) { it * j})
+            "R" -> copy(waypoint = waypoint.reduceRepeated(data / 90) { it * -j})
             "F" -> copy(pos = pos + waypoint * data)
             else -> this
         }
