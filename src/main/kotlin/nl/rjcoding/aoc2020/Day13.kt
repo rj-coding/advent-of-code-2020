@@ -17,9 +17,9 @@ object Day13 : Day {
         .map { (_, id) -> id to  (id - timestamp % id) }
         .minByOrNull { (_, wait) -> wait }!!.let { (id, wait) -> id * wait }
 
-    fun search(ids: List<Pair<Int, Long>>) = ids.fold(linearSeq(0L, 1L)) { seq, (offset, id) ->
+    fun search(ids: List<Pair<Int, Long>>) = ids.fold(linearSeq(start =0L, step = 1L)) { seq, (offset, id) ->
         seq.filter { (it + offset) % id == 0L }
             .take(2).toList()
-            .let { (a, b) -> linearSeq(a, b - a) }
+            .let { (a, b) -> linearSeq(start = a, step = b - a) }
     }.first()
 }
