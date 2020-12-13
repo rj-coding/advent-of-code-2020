@@ -11,7 +11,7 @@ object Day13 : Day {
     }
 
     override fun part1(): Long = input.let { (timestamp, ids) -> earliest(timestamp, ids) }
-    override fun part2(): Long = search(input.second)
+    override fun part2(): Long = input.let { (_, ids) -> search(ids) }
 
     fun earliest(timestamp: Long, ids: List<Pair<Int, Long>>) = ids
         .map { (_, id) -> id to  (id - timestamp % id) }
