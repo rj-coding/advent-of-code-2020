@@ -20,28 +20,16 @@ class Day14Tests {
     """.trimIndent().lineSequence()
 
     @Test
-    fun mask() {
-        val mask = Day14.Command.Mask.fromString("mask = XXXXXXXXXXXXXXXXXXXXXXXXXXXXX1XXXX0X")
-        assertEquals(73, mask(11))
-        assertEquals(101, mask(101))
-        assertEquals(64, mask(0))
-    }
-
-    @Test
     fun evaluate1() {
         val commands = Day14.parse(input).toList()
-        val result = commands
-            .fold(Day14.State.INIT) { state, command -> state.update(command, 1) }
-            .memory.values.sum()
+        val result = Day14.evaluate(commands, 1)
         assertEquals(165, result)
     }
 
     @Test
     fun evaluate2() {
         val commands = Day14.parse(input2).toList()
-        val result = commands
-            .fold(Day14.State.INIT) { state, command -> state.update(command, 2) }
-            .memory.values.sum()
+        val result = Day14.evaluate(commands, 2)
         assertEquals(208, result)
     }
 }
