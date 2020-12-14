@@ -46,15 +46,12 @@ object Day14 : Day {
             val set = mask.map { if (it == 'X') '0' else it }.joinToString("").toLong(2)
 
             val addresses: List<Long> by lazy {
-                fun inner(remaining: String = mask, list: List<String> = listOf("")): List<String> =
-                    remaining.firstOrNull()?.toString()?.let { bit ->
-                        when (bit) {
-                            "X" -> inner(remaining.drop(1)).flatMap { listOf("0", "1").map { b -> "$b$it" } }
-                            else -> inner(remaining.drop(1)).map { "$bit$it" }
-                        }
-                    } ?: list
-
-                inner().map { it.toLong(2) }
+                mask.fold(listOf(0)) { list, b ->
+                    when (b) {
+                        'X' -> list.flatMap { listOf(it * 2, it * 2 + 1) }
+                        else -> list.map { it * 2 + b.toString().toLong() }
+                    }
+                }
             }
 
             fun address(input: Long) = invoke(input.toString(2).padStart(36, '0'))
