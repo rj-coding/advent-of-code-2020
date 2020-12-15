@@ -12,17 +12,21 @@ object Day14 : Day {
     fun parse(input: Sequence<String>) = input.map { Command.fromString(it) }
 
     fun evaluate(commands: List<Command>, version: Int): Long {
-        return commands.fold(Command.Mask("X".repeat(36)) to mapOf<Long, Long>()) { (mask, memory), command ->
+        return commands.fold(Command.Mask("X".repeat(36)) to mutableMapOf<Long, Long>()) { (mask, memory), command ->
             update(command, mask, memory, version)
         }.second.values.sum()
     }
 
-    fun update(command: Command, mask: Command.Mask, memory: Map<Long, Long>, version: Int): Pair<Command.Mask, Map<Long, Long>> {
+    fun update(command: Command, mask: Command.Mask, memory: MutableMap<Long, Long>, version: Int): Pair<Command.Mask, MutableMap<Long, Long>> {
         return when (command) {
             is Command.Mask -> command to memory
             is Command.Write -> when (version) {
-                1 -> mask to memory + (command.address to (command.value and mask.clear or mask.set))
-                2 -> mask to memory + addresses(maskAddress(command.address, mask)).map { it to command.value }
+                1 -> mask to memory.also { it[command.address] = command.value and mask.clear or mask.set}
+                2 -> mask to memory.also {
+                    addresses(maskAddress(command.address, mask)).forEach { address ->
+                        it[address] = command.value
+                    }
+                }
                 else -> mask to memory
             }
         }
@@ -30,8 +34,9 @@ object Day14 : Day {
 
     fun addresses(mask: Command.Mask): List<Long> = mask.mask.fold(listOf(0)) { list, b ->
         when (b) {
-            'X' -> list.flatMap { listOf(it * 2, it * 2 + 1) }
-            else -> list.map { it * 2 + b.toString().toLong() }
+            'X' -> list.map { it * 2 } + list.map { it * 2 + 1 }
+            '1' -> list.map { it * 2 + 1 }
+            else -> list.map { it * 2 }
         }
     }
 
