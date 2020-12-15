@@ -1,28 +1,29 @@
 package nl.rjcoding.aoc2020
 
 object Day15 : Day {
-    override fun part1(): Long = numbers(listOf(2,1,10,11,0,6)).take(2020).last()
+    override fun part1(): Long = solve(listOf(2,1,10,11,0,6), 2020).toLong()
 
-    override fun part2(): Long = numbers(listOf(2,1,10,11,0,6)).take(30000000).last()
+    override fun part2(): Long = solve(listOf(2,1,10,11,0,6), 30000000).toLong()
 
-    fun numbers(start: List<Long>): Sequence<Long> = sequence {
-        val history = mutableMapOf<Long, Pair<Long, Long>>()
-        start.forEachIndexed { i, n ->
-            history[n] = i.toLong() to i.toLong()
-            yield(n)
-        }
+    fun solve(start: List<Int>, count: Int): Int {
 
-        var last = start.last()
-        var i = start.size.toLong()
-        while (true) {
-            history[last]!!.also { (a, b) ->
-                last = b - a
-                history[last]
-                    ?.also { (_, c) -> history[last] = c to i }
-                    ?: run { history[last] = i to i }
+        val memory = IntArray(count) { -1 }
+        start.take(start.size - 1).forEachIndexed { i, n -> memory[n] = i }
+
+        tailrec fun inner(turn: Int, lastSpoken: Int): Int {
+            if (turn == count - 1)
+                return lastSpoken
+
+            return if (memory[lastSpoken] == -1) {
+                memory[lastSpoken] = turn
+                inner(turn + 1, 0)
+            } else {
+                val spoken = turn - memory[lastSpoken]
+                memory[lastSpoken] = turn
+                inner(turn + 1, spoken)
             }
-            yield(last)
-            i++
         }
+
+        return inner(start.size - 1, start.last())
     }
 }
