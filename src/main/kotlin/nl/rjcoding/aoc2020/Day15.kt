@@ -1,8 +1,8 @@
 package nl.rjcoding.aoc2020
 
 object Day15 : Day {
-    override fun part1(): Long = solve(listOf(2,1,10,11,0,6), 2020).toLong()
 
+    override fun part1(): Long = solve(listOf(2,1,10,11,0,6), 2020).toLong()
     override fun part2(): Long = solve(listOf(2,1,10,11,0,6), 30000000).toLong()
 
     fun solve(start: List<Int>, count: Int): Int {
