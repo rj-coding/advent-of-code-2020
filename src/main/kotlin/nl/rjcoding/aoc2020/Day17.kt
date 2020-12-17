@@ -18,30 +18,30 @@ object Day17 : Day {
         }
     }
 
-    fun neighborOffsets(dim: Int) = offsetCache.getOrPut(dim) { listOf(-1, 0, 1).combinations(dim).filter { c -> !c.all { it == 0 } } }
-
-    fun neighborsOf(point: List<Int>): List<List<Int>> = neighborCache.getOrPut(point) {
-        neighborOffsets(point.size).map { neighbor -> point.zip(neighbor).map { (i, di) -> i + di } }
-    }
-
-    fun step(cubes: Set<List<Int>>): Set<List<Int>> {
+    fun step(points: Set<List<Int>>): Set<List<Int>> {
         val boundary = mutableSetOf<List<Int>>()
-        cubes.flatMap { point -> neighborsOf(point) }.forEach { n ->
-            if (!cubes.contains(n)) boundary.add(n)
+        points.flatMap { point -> neighborsOf(point) }.forEach { n ->
+            if (!points.contains(n)) boundary.add(n)
         }
 
         val next = mutableSetOf<List<Int>>()
-        cubes.forEach { cube ->
-            if (neighborsOf(cube).count { n -> cubes.contains(n) } in 2..3) {
-                next.add(cube)
+        points.forEach { point ->
+            if (neighborsOf(point).count { n -> points.contains(n) } in 2..3) {
+                next.add(point)
             }
         }
 
         boundary.forEach { inactive ->
-            if (neighborsOf(inactive).count { n -> cubes.contains(n) } == 3) {
+            if (neighborsOf(inactive).count { n -> points.contains(n) } == 3) {
                 next.add(inactive)
             }
         }
         return next
+    }
+
+    private fun neighborOffsets(dims: Int) = offsetCache.getOrPut(dims) { listOf(-1, 0, 1).combinations(dims).filter { c -> !c.all { it == 0 } } }
+
+    private fun neighborsOf(point: List<Int>): List<List<Int>> = neighborCache.getOrPut(point) {
+        neighborOffsets(point.size).map { neighbor -> point.zip(neighbor).map { (i, di) -> i + di } }
     }
 }
