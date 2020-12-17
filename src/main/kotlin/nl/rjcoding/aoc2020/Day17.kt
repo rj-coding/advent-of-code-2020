@@ -20,14 +20,12 @@ object Day17 : Day {
 
     fun step(points: Set<List<Int>>): Set<List<Int>> {
         val boundary = mutableSetOf<List<Int>>()
-        points.flatMap { point -> neighborsOf(point) }.forEach { n ->
-            if (!points.contains(n)) boundary.add(n)
-        }
-
         val next = mutableSetOf<List<Int>>()
+
         points.forEach { point ->
-            if (neighborsOf(point).count { n -> points.contains(n) } in 2..3) {
-                next.add(point)
+            neighborsOf(point).partition { n -> points.contains(n) }.also { (onPoints, onBoundary) ->
+                if (onPoints.size in 2..3) next.add(point)
+                boundary.addAll(onBoundary)
             }
         }
 
