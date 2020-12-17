@@ -12,9 +12,16 @@ class Day17Tests {
     """.trimIndent().lineSequence()
 
     @Test
-    fun parse() {
+    fun stepPart1() {
         val cubes = Day17.parse(input)
-        val result = cubes.reduceRepeated(6) { Day17.step(it) }
+        val result = cubes.reduceRepeated(6) { Day17.step(it, 1) }
         assertEquals(112, result.size)
+    }
+
+    @Test
+    fun stepPart2() {
+        val cubes = Day17.parse(input)
+        val result = cubes.reduceRepeated(6) { Day17.step(it, 2) }
+        assertEquals(848, result.size)
     }
 }
