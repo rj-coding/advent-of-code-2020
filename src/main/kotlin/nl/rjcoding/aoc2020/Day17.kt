@@ -3,7 +3,8 @@ package nl.rjcoding.aoc2020
 object Day17 : Day {
 
     val input = Util.readInputToLines("day17.txt").toList()
-    private val neighborOffsets = mutableMapOf<Int, List<List<Int>>>()
+    private val offsetCache = mutableMapOf<Int, List<List<Int>>>()
+    private val neighborCache = mutableMapOf<List<Int>, List<List<Int>>>()
 
     override fun part1(): Long = parse(input, 3).reduceRepeated(6) { step(it) }.size.toLong()
     override fun part2(): Long = parse(input, 4).reduceRepeated(6) { step(it) }.size.toLong()
@@ -17,10 +18,11 @@ object Day17 : Day {
         }
     }
 
-    fun neighborOffsets(dim: Int) = neighborOffsets.getOrPut(dim) { listOf(-1, 0, 1).combinations(dim).filter { c -> !c.all { it == 0 } } }
+    fun neighborOffsets(dim: Int) = offsetCache.getOrPut(dim) { listOf(-1, 0, 1).combinations(dim).filter { c -> !c.all { it == 0 } } }
 
-    fun neighborsOf(point: List<Int>): List<List<Int>> = neighborOffsets(point.size)
-        .map { neighbor -> point.zip(neighbor).map { (i, di) -> i + di } }
+    fun neighborsOf(point: List<Int>): List<List<Int>> = neighborCache.getOrPut(point) {
+        neighborOffsets(point.size).map { neighbor -> point.zip(neighbor).map { (i, di) -> i + di } }
+    }
 
     fun step(cubes: Set<List<Int>>): Set<List<Int>> {
         val boundary = mutableSetOf<List<Int>>()

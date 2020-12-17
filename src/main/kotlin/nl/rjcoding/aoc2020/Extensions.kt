@@ -15,8 +15,6 @@ fun Iterable<Long>.minMax(): Pair<Long, Long> = this.fold(Long.MAX_VALUE to Long
 
 fun <T> Iterable<T>.combinations(count: Int) = Util.combinations(this, count)
 
-
-
 fun <T> T.reduceRepeated(n: Int, block: (T) -> T): T = (0 until n).fold(this) { acc, _ -> block(acc) }
 
 operator fun Long.plus(complex: Complex) = Complex(this + complex.i, complex.j)
