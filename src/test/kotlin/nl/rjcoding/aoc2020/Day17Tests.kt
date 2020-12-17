@@ -9,19 +9,19 @@ class Day17Tests {
         .#.
         ..#
         ###
-    """.trimIndent().lineSequence()
+    """.trimIndent().lineSequence().toList()
 
     @Test
     fun stepPart1() {
-        val cubes = Day17.parse(input)
-        val result = cubes.reduceRepeated(6) { Day17.step(it, 1) }
+        val cubes = Day17.parse(input, 3)
+        val result = cubes.reduceRepeated(6) { Day17.step(it) }
         assertEquals(112, result.size)
     }
 
     @Test
     fun stepPart2() {
-        val cubes = Day17.parse(input)
-        val result = cubes.reduceRepeated(6) { Day17.step(it, 2) }
+        val cubes = Day17.parse(input, 4)
+        val result = cubes.reduceRepeated(6) { Day17.step(it) }
         assertEquals(848, result.size)
     }
 }

@@ -25,4 +25,15 @@ object Util {
     val offsets = listOf(-1, 0, 1).flatMap { i -> listOf(-1, 0, 1).map { j -> i to j } }.filter { (i, j) -> !(i == j && i == 0) }
     fun ray(dr: Int, dc: Int) = if (!(dr == dc && dr == 0)) generateSequence(dr to dc) { (i, j) -> (i + dr) to (j + dc) } else emptySequence()
     val rays = offsets.map { (dr, dc) -> ray(dr, dc) }
+
+    fun <T> combinations(seed: Iterable<T>, count: Int): List<List<T>> {
+
+        fun inner(acc: List<List<T>>, remaining: Int): List<List<T>> = when (remaining) {
+            0 -> acc
+            count ->  inner(seed.map { s -> listOf(s) }, remaining - 1)
+            else -> inner(seed.flatMap { s -> acc.map { list -> list + s } }, remaining - 1)
+        }
+
+        return inner(emptyList(), count)
+    }
 }

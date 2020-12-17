@@ -9,9 +9,13 @@ fun <T> Sequence<T>.takeWhileInclusive(pred: (T) -> Boolean): Sequence<T> {
     }
 }
 
-fun Collection<Long>.minMax(): Pair<Long, Long> = this.fold(Long.MAX_VALUE to Long.MIN_VALUE) { (min, max), v ->
+fun Iterable<Long>.minMax(): Pair<Long, Long> = this.fold(Long.MAX_VALUE to Long.MIN_VALUE) { (min, max), v ->
     kotlin.math.min(min, v) to kotlin.math.max(max, v)
 }
+
+fun <T> Iterable<T>.combinations(count: Int) = Util.combinations(this, count)
+
+
 
 fun <T> T.reduceRepeated(n: Int, block: (T) -> T): T = (0 until n).fold(this) { acc, _ -> block(acc) }
 

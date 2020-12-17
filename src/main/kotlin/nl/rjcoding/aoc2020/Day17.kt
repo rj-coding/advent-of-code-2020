@@ -2,56 +2,44 @@ package nl.rjcoding.aoc2020
 
 object Day17 : Day {
 
-    override fun part1(): Long = input.reduceRepeated(6) { step(it, 1) }.size.toLong()
-    override fun part2(): Long = input.reduceRepeated(6) { step(it, 2) }.size.toLong()
+    val input = Util.readInputToLines("day17.txt").toList()
+    private val neighborOffsets = mutableMapOf<Int, List<List<Int>>>()
 
-    val input = Util.readInputToLines("day17.txt").let(::parse)
+    override fun part1(): Long = parse(input, 3).reduceRepeated(6) { step(it) }.size.toLong()
+    override fun part2(): Long = parse(input, 4).reduceRepeated(6) { step(it) }.size.toLong()
 
-    val neighborOffsets = (-1 until 2).flatMap { dx ->
-        (-1 until 2).flatMap { dy ->
-            (-1 until 2).flatMap { dz ->
-                (-1 until 2).map { dw ->
-                    HPoint(dx, dy, dz, dw)
-                }
-            }
-        }
-    }.filter { (dx, dy, dz, dw ) -> !(dx == 0 && dy == 0 && dz ==0 && dw == 0) }
-
-    fun parse(input: Sequence<String>): Set<HPoint> = input.foldIndexed(setOf()) { y, set, line ->
+    fun parse(lines: List<String>, dims: Int): Set<List<Int>> = lines.foldIndexed(setOf()) { y, set, line ->
         set + line.mapIndexedNotNull { x, c ->
             when (c) {
-                '#' -> HPoint(x, y, 0, 0)
+                '#' -> listOf(x, y) + List(dims - 2) { 0 }
                 else -> null
             }
         }
     }
 
-    fun neighborsOf(cube: HPoint, part: Int) = neighborOffsets
-        .filter { part != 1 || it.w == 0 }
-        .map { (dx, dy, dz, dw) ->
-        HPoint(cube.x + dx, cube.y + dy, cube.z + dz, cube.w + dw)
-    }
+    fun neighborOffsets(dim: Int) = neighborOffsets.getOrPut(dim) { listOf(-1, 0, 1).combinations(dim).filter { c -> !c.all { it == 0 } } }
 
-    fun step(cubes: Set<HPoint>, part: Int): Set<HPoint> {
-        val boundary = mutableSetOf<HPoint>()
-        cubes.flatMap { cube -> neighborsOf(cube, part) }.forEach { n ->
+    fun neighborsOf(point: List<Int>): List<List<Int>> = neighborOffsets(point.size)
+        .map { neighbor -> point.zip(neighbor).map { (i, di) -> i + di } }
+
+    fun step(cubes: Set<List<Int>>): Set<List<Int>> {
+        val boundary = mutableSetOf<List<Int>>()
+        cubes.flatMap { point -> neighborsOf(point) }.forEach { n ->
             if (!cubes.contains(n)) boundary.add(n)
         }
 
-        val next = mutableSetOf<HPoint>()
+        val next = mutableSetOf<List<Int>>()
         cubes.forEach { cube ->
-            if (neighborsOf(cube, part).count { n -> cubes.contains(n) } in 2..3) {
+            if (neighborsOf(cube).count { n -> cubes.contains(n) } in 2..3) {
                 next.add(cube)
             }
         }
 
         boundary.forEach { inactive ->
-            if (neighborsOf(inactive, part).count { n -> cubes.contains(n) } == 3) {
+            if (neighborsOf(inactive).count { n -> cubes.contains(n) } == 3) {
                 next.add(inactive)
             }
         }
         return next
     }
-
-    data class HPoint(val x: Int, val y: Int, val z: Int, val w: Int)
 }
