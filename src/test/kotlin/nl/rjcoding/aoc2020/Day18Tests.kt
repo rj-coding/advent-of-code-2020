@@ -20,7 +20,7 @@ class Day18Tests {
         assertEquals(231, Day18.eval("1 + 2 * 3 + 4 * 5 + 6", true))
         assertEquals(51, Day18.eval("1 + (2 * 3) + (4 * (5 + 6))", true))
         assertEquals(46, Day18.eval("2 * 3 + (4 * 5)", true))
-        assertEquals(1445, Day18.eval("5 + (8 * 3 + 9 + 3 * 4 * 3", true))
+        assertEquals(1445, Day18.eval("5 + (8 * 3 + 9 + 3 * 4 * 3)", true))
         assertEquals(669060, Day18.eval("5 * 9 * (7 * 3 * 3 + 9 * 3 + (8 + 6 * 4))", true))
         assertEquals(23340, Day18.eval("((2 + 4 * 9) * (6 + 9 * 8 + 6) + 6) + 2 + 4 * 2", true))
     }
