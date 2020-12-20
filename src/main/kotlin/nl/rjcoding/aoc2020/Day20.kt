@@ -42,18 +42,18 @@ object Day20 : Day {
     }
 
     fun reconstruct(tiles: List<Image>): TileMap {
-        val images = Stack<TileMap>()
+        val maps = Stack<TileMap>()
         val dim = sqrt(tiles.size.toDouble()).toInt()
 
-        images.add(TileMap(dim, dim, listOf(), tiles.toSet()))
+        maps.add(TileMap(dim, dim, listOf(), tiles.toSet()))
 
         var answer: TileMap? = null
         while (answer == null) {
-            val image = images.pop()
-            if (image.isComplete) {
-                answer = image
+            val map = maps.pop()
+            if (map.isComplete) {
+                answer = map
             } else {
-                images.addAll(image.next())
+                maps.addAll(map.next())
             }
         }
         return answer
