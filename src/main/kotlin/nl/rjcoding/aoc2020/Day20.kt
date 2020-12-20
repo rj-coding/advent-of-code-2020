@@ -1,12 +1,12 @@
 package nl.rjcoding.aoc2020
 
 import nl.rjcoding.aoc2020.Constants.j
-import kotlin.math.min
+import java.util.*
+import kotlin.math.sqrt
 
 object Day20 : Day {
-    override fun part1(): Long {
-        TODO("Not yet implemented")
-    }
+    override fun part1(): Long = Util.readInputToLines("day20.txt").let(::parse).let(::reconstruct)
+        .corners().map { it.id }.reduce { l, r -> l * r }
 
     override fun part2(): Long {
         TODO("Not yet implemented")
@@ -14,11 +14,11 @@ object Day20 : Day {
 
     fun parse(input: Sequence<String>): List<Tile> {
         val tiles = mutableListOf<Tile>()
-        var currentId = -1
+        var currentId = -1L
         val acc = mutableListOf<String>()
         input.forEach { line ->
             when {
-                line.startsWith("Tile ") -> currentId = line.split(" ")[1].dropLast(1).toInt()
+                line.startsWith("Tile ") -> currentId = line.split(" ")[1].dropLast(1).toLong()
                 line.isBlank() -> {
                     tiles.add(Tile.fromString(currentId, acc))
                     acc.clear()
@@ -30,12 +30,30 @@ object Day20 : Day {
         return tiles
     }
 
-    data class Tile(val id: Int, val pixels: Set<Complex>, val width: Int, val height: Int) {
+    fun reconstruct(tiles: List<Tile>): Image {
+        val images = Stack<Image>()
+        val dim = sqrt(tiles.size.toDouble()).toInt()
 
-        fun rotateLeft(): Tile = fromPixels(id, pixels.map { it * j }.toSet(), width, height)
-        fun rotateRight(): Tile = fromPixels(id, pixels.map { it * -j }.toSet(), width, height)
-        fun flipHorizontal(): Tile = fromPixels(id, pixels.map { it.copy(i = -it.i) }.toSet(), width, height)
-        fun flipVertical(): Tile = fromPixels(id, pixels.map { it.copy(j = -it.j) }.toSet(), width, height)
+        images.add(Image(dim, dim, listOf(), tiles.toSet()))
+
+        var answer: Image? = null
+        while (answer == null) {
+            val image = images.pop()
+            if (image.isComplete) {
+                answer = image
+            } else {
+                images.addAll(image.next())
+            }
+        }
+        return answer
+    }
+
+    data class Tile(val id: Long, val pixels: Set<Complex>, val width: Int, val height: Int) {
+
+        fun rotateLeft(): Tile = Tile(id, pixels.map { it * j + height }.toSet(), height, width)
+        fun rotateRight(): Tile = Tile(id, pixels.map { it * -j + (width - 1) * j }.toSet(), height, width)
+        fun flipHorizontal(): Tile = Tile(id, pixels.map { it.copy(i = -it.i + (width - 1)) }.toSet(), width, height)
+        fun flipVertical(): Tile = Tile(id, pixels.map { it.copy(j = -it.j + (height - 1)) }.toSet(), width, height)
 
         fun variations(): Set<Tile> = listOf(this)
             .reduceRepeated(3) { tiles -> tiles + tiles.last().rotateRight() }
@@ -56,7 +74,7 @@ object Day20 : Day {
         }
 
         companion object {
-            fun fromString(id: Int, data: List<String>): Tile {
+            fun fromString(id: Long, data: List<String>): Tile {
                 val pixels = mutableSetOf<Complex>()
                 data.forEachIndexed { r, line ->
                     line.forEachIndexed { c, char ->
@@ -67,14 +85,35 @@ object Day20 : Day {
                 }
                 return Tile(id, pixels, data[0].length, data.size)
             }
-
-            fun fromPixels(id: Int, pixels: Set<Complex>, width: Int, height: Int): Tile {
-                val (minX, minY) = pixels.fold(Long.MAX_VALUE to Long.MAX_VALUE) { (minX, minY), c ->
-                    min(minX, c.i) to min(minY, c.j)
-                }
-                return Tile(id, width = width, height = height, pixels = pixels.map { p -> p - (minX + minY * j) }.toSet())
-            }
         }
 
+    }
+
+    data class Image(val width: Int, val height: Int, val tiles: List<Tile>, val options: Set<Tile>) {
+        val isComplete = tiles.size == width * height
+        val isValid = (!isComplete && options.isNotEmpty()) || isComplete
+
+        fun corners(): List<Tile> = listOf(0, width -1, width * (height - 1), width * height - 1)
+            .mapNotNull { tiles.getOrNull(it) }
+
+        fun next(): List<Image> {
+            val idx = tiles.size
+            val (row, col) = idx / height to idx % height
+            val edges = mutableSetOf<Pair<Direction, Set<Long>>>()
+
+            if (row > 0) edges.add(Direction.North to tiles[idx - width].edge(Direction.South))
+            if (col > 0) edges.add(Direction.West to tiles[idx - 1].edge(Direction.East))
+
+            val matches = when (idx) {
+                0 -> options.flatMap { it.variations() }
+                else -> options.mapNotNull { tile ->
+                    tile.variations().firstOrNull{ variation -> edges.all { (direction, edge) -> variation.edge(direction) == edge } }
+                }
+            }
+
+            return matches
+                .map { tile -> copy(tiles = tiles + tile, options = options - options.filter { it.id == tile.id }) }
+                .filter { image -> image.isValid }
+        }
     }
 }
