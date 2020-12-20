@@ -1,5 +1,19 @@
 package nl.rjcoding.aoc2020
 
+enum class Direction {
+    North,
+    East,
+    South,
+    West;
+
+    fun opposite(): Direction = when (this) {
+        North -> South
+        East -> West
+        South -> North
+        West -> East
+    }
+}
+
 data class Complex(val i: Long = 0, val j: Long = 0) {
 
     constructor(i: Int, j: Int): this(i.toLong(), j.toLong())
