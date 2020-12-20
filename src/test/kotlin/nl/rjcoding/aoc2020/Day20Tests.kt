@@ -1,5 +1,6 @@
 package nl.rjcoding.aoc2020
 
+import nl.rjcoding.aoc2020.Day20.MONSTER
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -130,27 +131,12 @@ class Day20Tests {
     }
 
     @Test
-    fun flip() {
+    fun stitch() {
         val tiles = Day20.parse(input)
-        val f0 = tiles[0].flipHorizontal()
-        val f1 = tiles[0].flipVertical()
-        //assertEquals(tiles[0], f0)
-        //assertEquals(f0, f1)
-        println()
-    }
-
-    @Test
-    fun variations() {
-        val tiles = Day20.parse(input)
-        val variations = tiles[0].variations()
-        println()
-    }
-
-    @Test
-    fun solve() {
-        val tiles = Day20.parse(input)
-        val result = Day20.reconstruct(tiles)
-        val corners = result.corners().map { it.id }
-        println()
+        val solution = Day20.reconstruct(tiles)
+        val image = solution.stitch(1)
+        val count = Day20.findMonster(image)
+        val result = image.pixels.size - MONSTER.pixels.size * count
+        assertEquals(273, result)
     }
 }

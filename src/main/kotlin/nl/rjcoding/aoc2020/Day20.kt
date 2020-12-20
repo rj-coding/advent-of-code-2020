@@ -3,40 +3,51 @@ package nl.rjcoding.aoc2020
 import nl.rjcoding.aoc2020.Constants.j
 import java.util.*
 import kotlin.math.sqrt
+import kotlin.random.Random
 
 object Day20 : Day {
-    override fun part1(): Long = Util.readInputToLines("day20.txt").let(::parse).let(::reconstruct)
-        .corners().map { it.id }.reduce { l, r -> l * r }
 
-    override fun part2(): Long {
-        TODO("Not yet implemented")
+    val MONSTER = """
+        ..................#.
+        #....##....##....###
+        .#..#..#..#..#..#...
+    """.trimIndent().lines().let { lines -> Image.fromString(Random.nextLong(), lines) }
+
+    private val reconstructed : TileMap by lazy {
+        Util.readInputToLines("day20.txt").let(::parse).let(::reconstruct)
     }
 
-    fun parse(input: Sequence<String>): List<Tile> {
-        val tiles = mutableListOf<Tile>()
+    override fun part1(): Long = reconstructed.corners().map { it.id }.reduce { l, r -> l * r }
+
+    override fun part2(): Long = reconstructed.stitch(1).let { image ->
+        image.pixels.size - MONSTER.pixels.size * findMonster(image)
+    }.toLong()
+
+    fun parse(input: Sequence<String>): List<Image> {
+        val tiles = mutableListOf<Image>()
         var currentId = -1L
         val acc = mutableListOf<String>()
         input.forEach { line ->
             when {
                 line.startsWith("Tile ") -> currentId = line.split(" ")[1].dropLast(1).toLong()
                 line.isBlank() -> {
-                    tiles.add(Tile.fromString(currentId, acc))
+                    tiles.add(Image.fromString(currentId, acc))
                     acc.clear()
                 }
                 else -> acc.add(line)
             }
         }
-        tiles.add(Tile.fromString(currentId, acc))
+        tiles.add(Image.fromString(currentId, acc))
         return tiles
     }
 
-    fun reconstruct(tiles: List<Tile>): Image {
-        val images = Stack<Image>()
+    fun reconstruct(tiles: List<Image>): TileMap {
+        val images = Stack<TileMap>()
         val dim = sqrt(tiles.size.toDouble()).toInt()
 
-        images.add(Image(dim, dim, listOf(), tiles.toSet()))
+        images.add(TileMap(dim, dim, listOf(), tiles.toSet()))
 
-        var answer: Image? = null
+        var answer: TileMap? = null
         while (answer == null) {
             val image = images.pop()
             if (image.isComplete) {
@@ -48,14 +59,23 @@ object Day20 : Day {
         return answer
     }
 
-    data class Tile(val id: Long, val pixels: Set<Complex>, val width: Int, val height: Int) {
+    fun findMonster(image: Image): Int {
+        return image.variations().asSequence().map { source ->
+            (0 until source.height).flatMap { r ->  (0 until source.width).map { c -> r to c } }
+                .count { (r, c) ->
+                    source.pixels.containsAll(MONSTER.pixels.map { p -> p + r + c * j })
+                }
+        }.first {  it > 0 }
+    }
 
-        fun rotateLeft(): Tile = Tile(id, pixels.map { it * j + height }.toSet(), height, width)
-        fun rotateRight(): Tile = Tile(id, pixels.map { it * -j + (width - 1) * j }.toSet(), height, width)
-        fun flipHorizontal(): Tile = Tile(id, pixels.map { it.copy(i = -it.i + (width - 1)) }.toSet(), width, height)
-        fun flipVertical(): Tile = Tile(id, pixels.map { it.copy(j = -it.j + (height - 1)) }.toSet(), width, height)
+    data class Image(val id: Long, val pixels: Set<Complex>, val width: Int, val height: Int) {
 
-        fun variations(): Set<Tile> = listOf(this)
+        fun rotateLeft(): Image = Image(id, pixels.map { it * j + (height - 1) }.toSet(), height, width)
+        fun rotateRight(): Image = Image(id, pixels.map { it * -j + (width - 1) * j }.toSet(), height, width)
+        fun flipHorizontal(): Image = Image(id, pixels.map { it.copy(i = -it.i + (width - 1)) }.toSet(), width, height)
+        fun flipVertical(): Image = Image(id, pixels.map { it.copy(j = -it.j + (height - 1)) }.toSet(), width, height)
+
+        fun variations(): Set<Image> = listOf(this)
             .reduceRepeated(3) { tiles -> tiles + tiles.last().rotateRight() }
             .flatMap { tile -> listOf(tile, tile.flipHorizontal(), flipVertical()) }
             .toSet()
@@ -67,6 +87,15 @@ object Day20 : Day {
             Direction.West -> pixels.filter { it.i == 0L }.map { it.j }.toSet()
         }
 
+        fun crop(amount: Int) = copy(
+            width = width - 2 * amount,
+            height = height - 2 * amount,
+            pixels = pixels
+                .filter { c -> c.j >= amount && c.j < (height - amount) && c.i >= amount && c.i < (width - amount) }
+                .map { c -> c - (amount + amount * j)}
+                .toSet()
+        )
+
         override fun toString(): String {
             return (0 until height).map { r ->
                 (0 until width).map { c -> if (pixels.contains(c + (height - r - 1) * j)) '#' else '.' }.joinToString("")
@@ -74,7 +103,7 @@ object Day20 : Day {
         }
 
         companion object {
-            fun fromString(id: Long, data: List<String>): Tile {
+            fun fromString(id: Long, data: List<String>): Image {
                 val pixels = mutableSetOf<Complex>()
                 data.forEachIndexed { r, line ->
                     line.forEachIndexed { c, char ->
@@ -83,20 +112,20 @@ object Day20 : Day {
                         }
                     }
                 }
-                return Tile(id, pixels, data[0].length, data.size)
+                return Image(id, pixels, data[0].length, data.size)
             }
         }
 
     }
 
-    data class Image(val width: Int, val height: Int, val tiles: List<Tile>, val options: Set<Tile>) {
+    data class TileMap(val width: Int, val height: Int, val tiles: List<Image>, val options: Set<Image>) {
         val isComplete = tiles.size == width * height
         val isValid = (!isComplete && options.isNotEmpty()) || isComplete
 
-        fun corners(): List<Tile> = listOf(0, width -1, width * (height - 1), width * height - 1)
+        fun corners(): List<Image> = listOf(0, width -1, width * (height - 1), width * height - 1)
             .mapNotNull { tiles.getOrNull(it) }
 
-        fun next(): List<Image> {
+        fun next(): List<TileMap> {
             val idx = tiles.size
             val (row, col) = idx / height to idx % height
             val edges = mutableSetOf<Pair<Direction, Set<Long>>>()
@@ -114,6 +143,19 @@ object Day20 : Day {
             return matches
                 .map { tile -> copy(tiles = tiles + tile, options = options - options.filter { it.id == tile.id }) }
                 .filter { image -> image.isValid }
+        }
+
+        fun stitch(cropAmount: Int): Image {
+            val cropped = tiles.map { it.crop(cropAmount) }
+            val (tileWidth, tileHeight) = cropped.first().width to cropped.first().height
+            val (imageWidth, imageHeight) = width * tileWidth to height * tileHeight
+            val pixels = mutableSetOf<Complex>()
+
+            cropped.forEachIndexed { idx, tile ->
+                val (row, col) = (height - 1) - idx / height to idx % height
+                pixels.addAll(tile.pixels.map { pixel -> pixel + (col * tileWidth + row * tileHeight * j) })
+            }
+            return Image(Random.nextLong(), pixels, imageWidth, imageHeight)
         }
     }
 }
