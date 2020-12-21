@@ -207,7 +207,7 @@ class QuizAnswers {
 
     @Test
     fun `Day 21 part 1`() {
-        assertEquals(107399567124539, Day21.part1())
+        assertEquals(2786, Day21.part1())
     }
 
     @Test

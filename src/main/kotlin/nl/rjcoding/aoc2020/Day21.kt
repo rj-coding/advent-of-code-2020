@@ -5,14 +5,17 @@ import java.util.*
 object Day21 : GenericDay<Long, String> {
 
     private val REGEX = Regex("(.*|\\s*) \\(contains (.*)\\)")
+    private val input by lazy {
+        Util.readInputToLines("day21.txt").let(::parse)
+    }
 
-    override fun part1(): Long = Util.readInputToLines("day21.txt").let(::parse).let { (foods, allergens) ->
+    override fun part1(): Long = input.let { (foods, allergens) ->
         allergens.values.toSet().let { allergenIngredients ->
             foods.map { (it - allergenIngredients).size }.sum().toLong()
         }
     }
 
-    override fun part2(): String = Util.readInputToLines("day21.txt").let(::parse).second.let { allergens ->
+    override fun part2(): String = input.second.let { allergens ->
         allergens.map { it.key to it.value }.sortedBy { it.first }.joinToString(",") { it.second }
     }
 
