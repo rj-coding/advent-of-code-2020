@@ -4,19 +4,19 @@ import java.util.*
 
 object Day21 : GenericDay<Long, String> {
 
-    val REGEX = Regex("(.*|\\s*) \\(contains (.*)\\)")
+    private val REGEX = Regex("(.*|\\s*) \\(contains (.*)\\)")
 
-    override fun part1(): Long = Util.readInputToLines("day21.txt").let(::parse).let { (foods, map) ->
-        map.flatMap { it.value }.toSet().let { allergenIngredients ->
+    override fun part1(): Long = Util.readInputToLines("day21.txt").let(::parse).let { (foods, allergens) ->
+        allergens.values.toSet().let { allergenIngredients ->
             foods.map { (it - allergenIngredients).size }.sum().toLong()
         }
     }
 
-    override fun part2(): String = Util.readInputToLines("day21.txt").let(::parse).second.let(::isolate).let { allergens ->
+    override fun part2(): String = Util.readInputToLines("day21.txt").let(::parse).second.let { allergens ->
         allergens.map { it.key to it.value }.sortedBy { it.first }.joinToString(",") { it.second }
     }
 
-    fun parse(input: Sequence<String>): Pair<List<Set<String>>,Map<String, Set<String>>> {
+    fun parse(input: Sequence<String>): Pair<List<Set<String>>,Map<String,String>> {
         val foods = mutableListOf<Set<String>>()
         val map = mutableMapOf<String, Set<String>>()
         input.forEach { line ->
@@ -28,32 +28,32 @@ object Day21 : GenericDay<Long, String> {
                 }
             }
         }
-        return foods to map
+        return foods to isolate(map)
     }
 
-    fun isolate(map: Map<String, Set<String>>): Map<String, String> {
+    private fun isolate(map: Map<String, Set<String>>): Map<String, String> {
         val result = mutableMapOf<String, String>()
         val toEliminate = Stack<String>()
         val remaining = mutableMapOf<String, Set<String>>()
 
-        map.entries.forEach { (allergen, ingredients) ->
-            if (ingredients.size == 1) {
+        map.entries.partition { (_, ingredients) -> ingredients.size == 1 }.also { (singular, multiple) ->
+            singular.forEach { (allergen, ingredients) ->
                 result[allergen] = ingredients.first()
                 toEliminate.add(ingredients.first())
-            } else {
-                remaining[allergen] = ingredients
             }
+            multiple.forEach { (allergen, ingredients) -> remaining[allergen] = ingredients }
         }
 
         while (toEliminate.isNotEmpty()) {
             val ingredient = toEliminate.pop()
             val toRemove = mutableSetOf<String>()
-            remaining.keys.forEach { allergen ->
-                remaining[allergen] = remaining[allergen]!!.minus(ingredient)
-                if (remaining[allergen]!!.size == 1) {
-                    result[allergen] = remaining[allergen]!!.first()
-                    toEliminate.add(remaining[allergen]!!.first())
-                    toRemove.add(allergen)
+            remaining.forEach { (allergen, ingredients) ->
+                remaining[allergen] = (ingredients - ingredient).also { remainingIngredients ->
+                    if (remainingIngredients.size == 1) {
+                        result[allergen] = remainingIngredients.first()
+                        toEliminate.add(remainingIngredients.first())
+                        toRemove.add(allergen)
+                    }
                 }
             }
             toRemove.forEach { remaining.remove(it) }
