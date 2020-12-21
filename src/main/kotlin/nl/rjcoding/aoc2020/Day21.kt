@@ -2,16 +2,16 @@ package nl.rjcoding.aoc2020
 
 import java.util.*
 
-object Day21 : GenericDay<Long, String> {
+object Day21 : GenericDay<Int, String> {
 
     private val REGEX = Regex("(.*|\\s*) \\(contains (.*)\\)")
     private val input by lazy {
         Util.readInputToLines("day21.txt").let(::parse)
     }
 
-    override fun part1(): Long = input.let { (foods, allergens) ->
+    override fun part1(): Int = input.let { (foods, allergens) ->
         allergens.values.toSet().let { allergenIngredients ->
-            foods.map { (it - allergenIngredients).size }.sum().toLong()
+            foods.map { (it - allergenIngredients).size }.sum()
         }
     }
 
