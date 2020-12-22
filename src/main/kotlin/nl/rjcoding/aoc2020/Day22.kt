@@ -18,12 +18,15 @@ object Day22 : GenericDay<Int, Int> {
     }
 
     fun play(p1: Deque<Int>, p2: Deque<Int>, recursive: Boolean): Pair<Int, Deque<Int>> {
-        val history = mutableSetOf<Pair<List<Int>, List<Int>>>()
+        val history = mutableSetOf<List<Int>>()
         while (p1.isNotEmpty() && p2.isNotEmpty()) {
             if (recursive) {
-                val key = p1.toList() to p2.toList()
-                if (history.contains(key)) return 1 to p1
-                else history.add(key)
+                val (keyA, keyB) = p1.toList() to p2.toList()
+                if (history.contains(keyA) || history.contains(keyB)) return 1 to p1
+                else {
+                    history.add(keyA)
+                    history.add(keyB)
+                }
             }
 
             val (a, b) = p1.removeFirst() to p2.removeFirst()
