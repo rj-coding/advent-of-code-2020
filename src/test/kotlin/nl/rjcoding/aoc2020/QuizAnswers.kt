@@ -230,8 +230,8 @@ class QuizAnswers {
         assertEquals(68245739, Day23.part1())
     }
 
-    /*@Test
+    @Test
     fun `Day 23 part 2`() {
         assertEquals(219634632000, Day23.part2())
-    }*/
+    }
 }

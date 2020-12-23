@@ -15,45 +15,54 @@ object Day23 : Day {
         a.toLong() * b.toLong()
     }
 
-    fun parse(input: List<Int>): HashMap<Int, Int> {
+    /*fun parse(input: List<Int>): HashMap<Int, Int> {
         val size = input.size
         return hashMapOf<Int, Int>().also {
             input.indices.forEach { i ->
                 it[input[i]] = input[(i + 1) % size]
             }
         }
+    }*/
+
+    fun parse(input: List<Int>): Array<Int> {
+        val size = input.size
+        return Array(input.size + 1) { 0 }.also {
+            input.indices.forEach { i ->
+                it[input[i]] = input[(i + 1) % size]
+            }
+        }
     }
 
-    fun play(start: Int, cups: HashMap<Int, Int>, amount: Int): HashMap<Int, Int> {
+    fun play(start: Int, cups: Array<Int>, amount: Int): Array<Int> {
         val result = (start to cups).reduceRepeated(amount) { acc -> round(acc.first, acc.second) }
         return result.second
     }
 
-    fun order(cups: HashMap<Int, Int>): List<Int> {
-        val result = mutableListOf(cups[1]!!)
+    fun order(cups: Array<Int>): List<Int> {
+        val result = mutableListOf(cups[1])
         while (result.last() != 1) {
-            result.add(cups[result.last()]!!)
+            result.add(cups[result.last()])
         }
         return result.dropLast(1)
     }
 
-    fun round(current: Int, cups: HashMap<Int, Int>): Pair<Int, HashMap<Int, Int>> {
-        val picked = (0 until 3).fold(listOf(current)) { acc, _ -> acc + cups[acc.last()]!! }.drop(1)
-        cups[current] = cups[picked.last()]!!
-        picked.forEach {
-            cups.remove(it)
-        }
+    fun round(current: Int, cups: Array<Int>): Pair<Int, Array<Int>> {
+        val picked = Array(3) { 0 }
+        picked[0] = cups[current]
+        picked[1] = cups[picked[0]]
+        picked[2] = cups[picked[1]]
+        cups[current] = cups[picked[2]]
 
-        var destination = if (current - 1 <= 0) (cups.size + 3) else current - 1
+        var destination = if (current - 1 <= 0) (cups.size - 1) else current - 1
         while (picked.contains(destination)) {
-            destination = if (destination -1 ==  0) (cups.size + 3) else destination - 1
+            destination = if (destination -1 ==  0) (cups.size - 1) else destination - 1
         }
 
         picked.forEachIndexed { i, d ->
-            cups[d] = if (i == picked.size - 1) cups[destination]!! else picked[i + 1]!!
+            cups[d] = if (i == picked.size - 1) cups[destination] else picked[i + 1]
         }
-        cups[destination] = picked.first()
+        cups[destination] = picked[0]
 
-        return cups[current]!! to cups
+        return cups[current] to cups
     }
 }
