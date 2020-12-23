@@ -8,8 +8,8 @@ object Day23 : Day {
         val cups = it + (10 .. 1_000_000)
         play(cups.first(), parse(cups), 10_000_000)
     }.let { result ->
-        val a = result[1]!!
-        val b = result[a]!!
+        val a = result[1]
+        val b = result[a]
         a.toLong() * b.toLong()
     }
 
@@ -25,7 +25,7 @@ object Day23 : Day {
     fun play(start: Int, cups: IntArray, amount: Int): IntArray {
         var current = start
         repeat(amount) {
-            val picked = Array(3) { 0 }
+            val picked = IntArray(3) { 0 }
             picked[0] = cups[current]
             picked[1] = cups[picked[0]]
             picked[2] = cups[picked[1]]
