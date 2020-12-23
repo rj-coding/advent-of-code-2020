@@ -15,30 +15,21 @@ object Day23 : Day {
         a.toLong() * b.toLong()
     }
 
-    /*fun parse(input: List<Int>): HashMap<Int, Int> {
+    fun parse(input: List<Int>): IntArray {
         val size = input.size
-        return hashMapOf<Int, Int>().also {
-            input.indices.forEach { i ->
-                it[input[i]] = input[(i + 1) % size]
-            }
-        }
-    }*/
-
-    fun parse(input: List<Int>): Array<Int> {
-        val size = input.size
-        return Array(input.size + 1) { 0 }.also {
+        return IntArray(input.size + 1) { 0 }.also {
             input.indices.forEach { i ->
                 it[input[i]] = input[(i + 1) % size]
             }
         }
     }
 
-    fun play(start: Int, cups: Array<Int>, amount: Int): Array<Int> {
+    fun play(start: Int, cups: IntArray, amount: Int): IntArray {
         val result = (start to cups).reduceRepeated(amount) { acc -> round(acc.first, acc.second) }
         return result.second
     }
 
-    fun order(cups: Array<Int>): List<Int> {
+    fun order(cups: IntArray): List<Int> {
         val result = mutableListOf(cups[1])
         while (result.last() != 1) {
             result.add(cups[result.last()])
@@ -46,7 +37,7 @@ object Day23 : Day {
         return result.dropLast(1)
     }
 
-    fun round(current: Int, cups: Array<Int>): Pair<Int, Array<Int>> {
+    fun round(current: Int, cups: IntArray): Pair<Int, IntArray> {
         val picked = Array(3) { 0 }
         picked[0] = cups[current]
         picked[1] = cups[picked[0]]
