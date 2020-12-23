@@ -2,47 +2,45 @@ package nl.rjcoding.aoc2020
 
 object Day23 : Day {
 
-    override fun part1(): Long = 459672813L.toDigits().let { play(it.first(), parse(it), 100) }.let(::order).toLong()
+    override fun part1(): Long = play(459672813L.toDigits(), 9, 100).let { result ->
+        listOf(result[1]).reduceRepeated(result.size - 3) { acc -> acc + result[acc.last()] }
+    }.toLong()
 
-    override fun part2(): Long = 459672813L.toDigits().let {
-        val cups = it + (10 .. 1_000_000)
-        play(cups.first(), parse(cups), 10_000_000)
-    }.let { result ->
+    override fun part2(): Long = play(459672813L.toDigits(), 1_000_000, 10_000_000).let { result ->
         val a = result[1]
         val b = result[a]
         a.toLong() * b.toLong()
     }
 
-    fun parse(input: List<Int>): IntArray {
-        val size = input.size
-        return IntArray(input.size + 1) { 0 }.also {
-            input.indices.forEach { i ->
-                it[input[i]] = input[(i + 1) % size]
-            }
+    fun play(seed: List<Int>, size: Int, rounds: Int): IntArray {
+        val cups = IntArray(size) { i -> i + 1 }
+        seed.forEachIndexed { i, d -> cups[i] = d }
+
+        val lookup  = IntArray(size + 1)
+        (0 until size).forEach { i ->
+            lookup[cups[i]] = cups[(i + 1) % size]
         }
-    }
 
-    fun play(start: Int, cups: IntArray, amount: Int): IntArray {
-        var current = start
-        repeat(amount) {
+        var current = seed.first()
+        repeat(rounds) {
             val picked = IntArray(3) { 0 }
-            picked[0] = cups[current]
-            picked[1] = cups[picked[0]]
-            picked[2] = cups[picked[1]]
-            cups[current] = cups[picked[2]]
+            picked[0] = lookup[current]
+            picked[1] = lookup[picked[0]]
+            picked[2] = lookup[picked[1]]
+            lookup[current] = lookup[picked[2]]
 
-            var destination = if (current - 1 <= 0) (cups.size - 1) else current - 1
+            var destination = if (current - 1 <= 0) (lookup.size - 1) else current - 1
             while (picked.contains(destination)) {
-                destination = if (destination -1 ==  0) (cups.size - 1) else destination - 1
+                destination = if (destination -1 ==  0) (lookup.size - 1) else destination - 1
             }
 
             picked.forEachIndexed { i, d ->
-                cups[d] = if (i == picked.size - 1) cups[destination] else picked[i + 1]
+                lookup[d] = if (i == picked.size - 1) lookup[destination] else picked[i + 1]
             }
-            cups[destination] = picked[0]
-            current = cups[current]
+            lookup[destination] = picked[0]
+            current = lookup[current]
         }
-        return cups
+        return lookup
     }
 
     fun order(cups: IntArray): List<Int> {

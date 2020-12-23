@@ -7,18 +7,14 @@ class Day23Tests {
 
     @Test
     fun play10() {
-        val result = 389125467L.toDigits().let {
-            Day23.play(it.first(), Day23.parse(it), 10)
-        }
+        val result = Day23.play(389125467L.toDigits(), 9, 10)
         val score = Day23.order(result)
         assertEquals(92658374L, score.toLong())
     }
 
     @Test
     fun play100() {
-        val result = 389125467L.toDigits().let {
-            Day23.play(it.first(), Day23.parse(it), 100)
-        }
+        val result = Day23.play(389125467L.toDigits(), 9, 100)
         val score = Day23.order(result)
         assertEquals(67384529L, score.toLong())
     }
