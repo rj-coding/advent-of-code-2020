@@ -18,7 +18,7 @@ object Day22 : GenericDay<Int, Int> {
     }
 
     fun play(p1: Deque<Int>, p2: Deque<Int>, recursive: Boolean): Pair<Int, Deque<Int>> {
-        val history = mutableSetOf<List<Int>>()
+        val history = hashSetOf<List<Int>>()
         while (p1.isNotEmpty() && p2.isNotEmpty()) {
             if (recursive) {
                 val (keyA, keyB) = p1.toList() to p2.toList()
@@ -31,7 +31,7 @@ object Day22 : GenericDay<Int, Int> {
 
             val (a, b) = p1.removeFirst() to p2.removeFirst()
             val winner = when {
-                recursive && p1.size >= a && p2.size >= b -> play(ArrayDeque(p1.toList().take(a)), ArrayDeque(p2.toList().take(b)), recursive).first
+                recursive && p1.size >= a && p2.size >= b -> play(ArrayDeque(p1.take(a)), ArrayDeque(p2.take(b)), recursive).first
                 else -> if (a > b) 1 else 2
             }
 
