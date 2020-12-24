@@ -29,14 +29,6 @@ class Day24Tests {
     """.trimIndent().lineSequence()
 
     @Test
-    fun tileTest() {
-        val init = Day24.Tile(0, 0, 0)
-        assertEquals(init, init.next(Day24.Direction.E).next(Day24.Direction.W))
-        assertEquals(init, init.next(Day24.Direction.NE).next(Day24.Direction.SW))
-        assertEquals(init, init.next(Day24.Direction.NW).next(Day24.Direction.SE))
-    }
-
-    @Test
     fun flip() {
         val instructions = Day24.parse(input)
         val result = Day24.flip(instructions)

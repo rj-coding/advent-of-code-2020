@@ -2,26 +2,27 @@ package nl.rjcoding.aoc2020
 
 object Day24 : Day {
 
-    val input = Util.readInputToLines("day24.txt").let(::parse)
+    val directions = setOf("e", "se", "sw", "w", "nw", "ne")
+    val input = flip(Util.readInputToLines("day24.txt").let(::parse))
 
-    override fun part1(): Long = flip(input).size.toLong()
+    override fun part1(): Long = input.size.toLong()
 
-    override fun part2(): Long = flip(input).reduceRepeated(100) { next(it) }.size.toLong()
+    override fun part2(): Long = input.reduceRepeated(100) { next(it) }.size.toLong()
 
-    fun parse(sequence: Sequence<String>): List<List<Direction>> = sequence.map { line ->
-        val directions = mutableListOf<Direction>()
+    fun parse(sequence: Sequence<String>): List<List<String>> = sequence.map { line ->
+        val instruction = mutableListOf<String>()
         var acc = ""
         line.forEach { c ->
             acc += c
-            Direction.lookup[acc]?.also { direction ->
-                directions.add(direction)
+            if (this.directions.contains(acc)) {
+                instruction.add(acc)
                 acc = ""
             }
         }
-        directions
+        instruction
     }.toList()
 
-    fun flip(instructions: List<List<Direction>>): Set<Tile> {
+    fun flip(instructions: List<List<String>>): Set<Tile> {
         val flipped = mutableSetOf<Tile>()
         instructions.forEach { instruction ->
             val destination = instruction.fold(Tile(0, 0, 0)) { tile, d -> tile.next(d) }
@@ -51,33 +52,20 @@ object Day24 : Day {
             if (neighbors == 2) flipped.add(tile)
         }
 
-
         return flipped
     }
 
-    enum class Direction(val s: String) {
-        E("e"),
-        SE("se"),
-        SW("sw"),
-        W("w"),
-        NW("nw"),
-        NE("ne");
-
-        companion object {
-            val lookup = values().map { direction -> direction.s to direction }.toMap()
-        }
-    }
-
     data class Tile(val x: Int, val y: Int, val z: Int) {
-        fun next(direction: Direction): Tile = when (direction) {
-            Direction.E -> copy(x = x + 1, y = y - 1)
-            Direction.SE -> copy(y = y - 1, z = z + 1)
-            Direction.SW -> copy(x = x - 1, z = z + 1)
-            Direction.W -> copy(x = x - 1, y = y + 1)
-            Direction.NW -> copy(y = y + 1, z = z - 1)
-            Direction.NE -> copy(x = x + 1, z = z - 1)
+        fun next(direction: String): Tile = when (direction) {
+            "e" -> copy(x = x + 1, y = y - 1)
+            "se" -> copy(y = y - 1, z = z + 1)
+            "sw" -> copy(x = x - 1, z = z + 1)
+            "w" -> copy(x = x - 1, y = y + 1)
+            "nw" -> copy(y = y + 1, z = z - 1)
+            "ne" -> copy(x = x + 1, z = z - 1)
+            else -> this
         }
 
-        fun neighbors(): Set<Tile> = Direction.values().map { next(it) }.toSet()
+        fun neighbors(): Set<Tile> = Day24.directions.map { next(it) }.toSet()
     }
 }
