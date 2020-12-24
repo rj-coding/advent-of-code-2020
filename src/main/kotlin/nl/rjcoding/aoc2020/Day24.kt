@@ -7,7 +7,7 @@ object Day24 : Day {
 
     override fun part1(): Long = input.size.toLong()
 
-    override fun part2(): Long = input.reduceRepeated(100) { next(it) }.size.toLong()
+    override fun part2(): Long = iterate(input, 100).size.toLong()
 
     fun parse(sequence: Sequence<String>): List<List<String>> = sequence.map { line ->
         val instruction = mutableListOf<String>()
@@ -31,28 +31,30 @@ object Day24 : Day {
         return flipped
     }
 
-    fun next(tiles: Set<Tile>): Set<Tile> {
+    fun iterate(start: Set<Tile>, amount: Int): Set<Tile> {
+        val current = start.toMutableSet()
         val flipped = mutableSetOf<Tile>()
         val boundary = hashMapOf<Tile, Int>()
         val neighbors = hashMapOf<Tile, Int>()
-        tiles.map { it to it.neighbors() }.forEach { (tile, ns) ->
-            ns.filter { !tiles.contains(it) }.forEach { emptyTile ->
-                boundary[emptyTile] = boundary.getOrDefault(emptyTile, 0) + 1
+
+        repeat(amount) {
+            current.map { it to it.neighbors() }.forEach { (tile, ns) ->
+                ns.filter { !current.contains(it) }.forEach { emptyTile ->
+                    boundary[emptyTile] = boundary.getOrDefault(emptyTile, 0) + 1
+                }
+                neighbors[tile] = ns.filter { current.contains(it) }.size
             }
-            neighbors[tile] = ns.filter { tiles.contains(it) }.size
+            current.filter { tile ->  neighbors[tile]!!.let { it != 0 && it <= 2 } }.also { flipped.addAll(it) }
+            boundary.forEach { (tile, neighbors) -> if (neighbors == 2) flipped.add(tile) }
+
+            current.clear()
+            current.addAll(flipped)
+
+            flipped.clear()
+            boundary.clear()
+            neighbors.clear()
         }
-
-        // rule 1
-        tiles.filter { tile ->
-            neighbors[tile]!!.let { it != 0 && it <= 2 }
-        }.also { flipped.addAll(it) }
-
-        // rule 2
-        boundary.forEach { tile, neighbors ->
-            if (neighbors == 2) flipped.add(tile)
-        }
-
-        return flipped
+        return current
     }
 
     data class Tile(val x: Int, val y: Int, val z: Int) {
@@ -66,6 +68,6 @@ object Day24 : Day {
             else -> this
         }
 
-        fun neighbors(): Set<Tile> = Day24.directions.map { next(it) }.toSet()
+        fun neighbors(): Set<Tile> = directions.map { next(it) }.toSet()
     }
 }

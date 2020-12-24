@@ -39,7 +39,7 @@ class Day24Tests {
     fun next() {
         val instructions = Day24.parse(input)
         val init = Day24.flip(instructions)
-        val day100 = init.reduceRepeated(100) { Day24.next(it) }
+        val day100 = Day24.iterate(init, 100)
         assertEquals(2208, day100.size)
     }
 }
