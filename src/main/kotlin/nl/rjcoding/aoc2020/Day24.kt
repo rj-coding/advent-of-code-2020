@@ -32,15 +32,21 @@ object Day24 : Day {
 
     fun next(tiles: Set<Tile>): Set<Tile> {
         val flipped = mutableSetOf<Tile>()
+        val boundary = hashSetOf<Tile>()
+        val neighbors = hashMapOf<Tile, Int>()
+        tiles.map { it to it.neighbors() }.forEach { (tile, ns) ->
+            boundary.addAll(ns)
+            neighbors[tile] = ns.filter { tiles.contains(it) }.size
+        }
+        boundary.removeAll(tiles)
 
         // rule 1
         tiles.filter { tile ->
-            tile.neighbors().filter { tiles.contains(it) }.size.let { it != 0 && it <= 2 }
+            neighbors[tile]!!.let { it != 0 && it <= 2 }
         }.also { flipped.addAll(it) }
 
         // rule 2
-        (tiles.fold(setOf<Tile>()) { boundary, tile -> boundary + tile.neighbors() } - tiles)
-            .filter { tile ->
+        boundary.filter { tile ->
                 tile.neighbors().filter { tiles.contains(it) }.size == 2
             }.also { flipped.addAll(it) }
 
