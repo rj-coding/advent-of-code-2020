@@ -244,4 +244,9 @@ class QuizAnswers {
     fun `Day 24 part 2`() {
         assertEquals(3900, Day24.part2())
     }
+
+    @Test
+    fun `Day 25 part 1`() {
+        assertEquals(16902792, Day25.part1())
+    }
 }
