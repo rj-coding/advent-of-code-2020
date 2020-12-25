@@ -4,22 +4,11 @@ object Day25 : GenericDay<Long, Unit> {
 
     val keys = 18356117L to 5909654L
 
-    override fun part1(): Long = keys.let { (card, door) -> transform(door, loop(card)) }
+    override fun part1(): Long = keys.let { (card, door) -> solve(card, door) }
 
     override fun part2(): Unit {}
 
-    fun loop(key: Long): Int = sequence {
-        var acc = 1L
-        var i = 0
-        while (true) {
-            yield(i to acc)
-            acc *= 7L
-            acc %= 20201227
-            i += 1
-        }
-    }.first { it.second == key }.first
-
-    fun transform(key: Long, loop: Int): Long {
-        return (1L).reduceRepeated(loop) { acc -> (acc * key) % 20201227 }
-    }
+    fun solve(key1: Long, key2: Long) = generateSequence(1L to 1L) { (acc1, acc2) ->
+        (acc1 * 7L) % 20201227 to (acc2 * key2) % 20201227
+    }.first { it.first == key1 }.second
 }
